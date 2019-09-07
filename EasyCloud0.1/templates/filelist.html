@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<style>
+			.common_text{
+				font-family: "lucida console";
+				font-size: 15px;
+				color: #7FFFD4;
+			}
+			.MyInput{
+			    outline-style: none ;
+			    border: 1px solid #ccc; 
+			    border-radius: 3px;
+			    padding: 13px 14px;
+			    font-size: 14px;
+			    font-weight: 700;
+			    font-family: "lucida console";
+				color: #31BC86;
+			}
+			.PopBox{
+				display: none;
+				position: fixed;
+				top: 200px;
+				left: 200px;
+				text-align: center;
+				margin: 0 auto;
+				width: 500px;
+				height: 200px;
+				background: rgba(20,20,20,0.3);
+			}
+		</style>
+	</head>
+	<style>
+		a{
+			text-decoration: none;
+		}
+		a:visited{
+			color: #F0FFFF;
+		}
+		a:link{
+			color: #F0FFFF;
+		}
+		a:hover{
+			color: #31BC86;
+		}
+		table{
+			width: 100%;
+			color: azure;
+			font-family:"lucida console";
+			font-size: 15px;
+		}
+		th{
+			position: relative;
+			top: 8px;
+			width: 15%;
+			border: none;
+			float: left;
+		}
+		th.check_box{
+			position: relative;
+			top: 8px;
+			width: 5%;
+			border: none;
+			float: left;
+		}
+
+		td.td_box{
+			position:relative;
+			top: 8px;
+			width: 15%;
+			border: none;
+			float: left;
+		}
+		td.check_box{
+			position: relative;
+			top: 8px;
+			width: 5%;
+			border: none;
+			float: left;
+		}
+		tr.file{
+			height: 40px;
+			vertical-align: middle;
+			text-align: center;
+		}
+		tr.file:nth-child(even){
+			background-color: rgba(96,96,96,0.5);
+		}
+		tr.file:hover{
+			background-color: rgba(129,208,177,.3);
+		}
+		tr.header{
+			height: 35px;vertical-align: middle;
+		}
+		#Menu{
+			height: 80px;
+		}
+		.MenuButton{
+			font-family: "lucida console";
+			color: #F0F8FF;
+			border: solid 1px #7FFFD4;
+			border-color: aquamarine;
+			border-radius: 5px;
+			height: 100%;
+			width: 100%;
+			background-color: rgba(25,25,25,0.3);
+			display: block;
+			margin: 0 auto;
+		}
+		.MenuOperation{
+			float: left;
+			margin-left: 20px;
+			height: 50%;
+			width: 100px;
+		}
+	</style>
+	
+	
+	<script>
+		function _quote(string){
+			
+			return "\"" + string + "\""
+		}
+		function _filelist_tostring(filelist){
+			/* convert file list to string value */
+
+			_Ret = "["
+			for(var i = 0;i < filelist.length;i++){
+				if(i != filelist.length - 1){
+					_Ret += _quote(filelist[i]) + ","
+				}else{
+					_Ret += _quote(filelist[i]) + "]"
+				}
+			}
+			return _Ret
+		}
+		function secure_foldername(name){
+			return name.replace(" ","")
+		}
+		function currentPath(){
+			_source = window.location.href
+			_entry_name = "filelist"
+			return _source.slice(_source.indexOf(_entry_name) + _entry_name.length)
+		}
+		function back(){
+			
+			_entry_name = "filelist"
+			_current = window.location.href
+			_subpath = _current.slice(_current.indexOf(_entry_name) + _entry_name.length)
+			if(_subpath != "/Files"){
+				_newsubpath = _subpath.slice(0,_subpath.lastIndexOf("/"))
+				window.location.href = _current.replace(_subpath,_newsubpath)
+			}
+		}
+		function showFileReader(){
+			filereader = document.getElementById("FileReceiver")
+			filereader.onchange = function(){
+				uploadFile(filereader.files[0])
+			}
+			filereader.click()
+		}
+		function uploadFile(file){
+			// upload file to server
+
+			var fd = new FormData()
+			fd.append("file",file)
+			var xhr = new XMLHttpRequest()
+			//xhr.upload.addEventListener("progress",upload_progress,false)
+			xhr.addEventListener("load",completed,false)
+			xhr.addEventListener("error",failed,false)
+			xhr.addEventListener("abort",cancel,false)
+			
+			filepath = currentPath() + "/" + file.name
+			xhr.open("POST","/upload" + filepath)
+			xhr.send(fd)
+			//window.location.reload()
+		}
+		function remove_select_files(){
+			/* output all files selected */
+
+			var _filelist = document.getElementById("filelist").getElementsByClassName("file")
+			_Ret = []
+			var fd = new FormData()
+			for(var i = 0;i<_filelist.length;i++){
+				/* inner li label */ 
+				
+				if(_filelist[i].getElementsByClassName("filechoose_box")[0].getElementsByTagName("input")[0].checked){
+					var _p = _filelist[i].getElementsByClassName("filechoose_file")[0]
+					console.log(_p)
+					console.log(_p.innerHTML)
+					_Ret.push(_p.innerHTML)
+				}
+			}
+			if(_Ret.length != 0){
+				fd.append("files_json_value",_filelist_tostring(_Ret))
+				console.log(_Ret)
+				var xhr = new XMLHttpRequest()
+				xhr.addEventListener("load",completed,false)
+				xhr.addEventListener("error",failed,false)
+				xhr.open("POST","/remove")
+				xhr.send(fd)
+			}
+		}
+		
+		function call_create_folder(){
+			document.getElementById("popbox").style.display = "block"
+		}
+		function hide_popbox(){
+			document.getElementById("popbox").style.display = "none"
+		}
+		function create_newfolder(){
+			name = document.getElementById("FolderName").value
+			if(name != ""){
+				create_folder(name)
+			}
+		}
+		function create_folder(foldername){
+			
+			foldername = secure_foldername(foldername)
+			if(foldername != ""){
+				var fd = new FormData()
+				fd.append("folder_name",foldername)
+				var xhr = new XMLHttpRequest()
+				xhr.addEventListener("load",completed,false)
+				xhr.addEventListener("error",failed,false)
+				xhr.open("POST","/folder" + currentPath())
+				xhr.send(fd)
+			}else{
+				alert("invalid floder name")
+			}
+		}
+		
+		function completed(evt){
+			/* when file upload completed */
+
+			alert(evt.target.responseText)
+			window.location.reload()
+		}
+		
+		function failed(evt){
+			/* when file upload failed */
+
+			alert("something error happened in this operation")
+		}
+
+		function cancel(evt){
+			/* upload progress interrupted by browser or user */
+
+			alert("operation has been stopped")
+		}
+		
+		function test(){
+			filereader = document.getElementById("FileReceiver")
+			console.log(filereader.files[0])
+		}
+	</script>
+	<body>
+		<div id="Menu">
+			<div class="MenuOperation">
+				<button class="MenuButton" onclick="back()">Back</button>
+			</div>
+			<div class="MenuOperation">
+				<button class="MenuButton" onclick="showFileReader()">上传文件</button>
+			</div>
+			<div class="MenuOperation">
+				<button class="MenuButton" onclick="remove_select_files()">删除文件</button>
+			</div>
+			<div class="MenuOperation">
+				<button class="MenuButton" onclick="call_create_folder()">创建文件夹</button>
+			</div>
+		</div>
+		<h2 id="current_path" class="common_text">{{ current_path }}</h2>
+		<table id="filelist">
+			<tr class="header" style="background-color: rgba(0,0,0,0.5)">
+				<th class="check_box"><input autocomplete="off" type="checkbox"/></th>
+				<th>文件名</th>
+				<th>类型</th>
+				<th>大小</th>
+				<th>下载文件</th>
+			</tr>
+			{% for file in files %}
+			{% if file['_type'] == 1 %}
+			<tr class="file">
+				<td class="check_box filechoose_box"><input autocomplete="off" type="checkbox"></td>
+				<td class="td_box">{{ file['filename'] }}</td>
+				<td class="td_box">{{ file['filetype'] }}</td>
+				<td class="td_box">{{ file['filesize'] }}</td>
+				<td class="td_box"><a href={{ "/download/" + file['filepath'] }}>download</a></td>
+				<td class="td_box filechoose_file" style="display: none;" >{{ file['filepath']}}</td>
+			</tr>
+			{% else %}
+			<tr class="file">
+				<td class="check_box filechoose_box"><input class="filechoose_box" type="checkbox"></td>
+				<td class="td_box"><a href= {{ "/filelist/" + file['dirpath']}}>{{ file['dirname']}}</a></td>
+				<td class="td_box filechoose_file" style="display: none;">{{ file['dirpath']}}</td>
+			</tr>
+			{% endif %}
+			{% endfor %}
+		</table>
+		<form>
+			<input id="FileReceiver" type="file" name="file" style="display: none;"/>
+		</form>
+		<div id="popbox" class="PopBox">
+			<h3 class="common_text">
+				輸入文件名<input class="MyInput" id="FolderName" type="text" style="margin-top: 10%;margin-left: 30px;" value=""/>
+			</h3>
+			<div style="width: 100%; height: 30%;margin-top: 5%;">	
+				<div style="float: left;width: 50%;height: 100%;">
+					<button class="MenuButton" style="width: 100%" onclick="create_newfolder()">确认</button>
+				</div>
+				<div style="float: left;width: 50%;height: 100%;">
+					<button class="MenuButton" style="width: 100%" onclick="hide_popbox()">取消</button>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

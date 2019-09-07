@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>EasyCloud</title>
+	</head>
+	
+	<style>
+		@font-face {
+			font-family: 'HY';
+			src: url('{{ config["font-path"]}}');
+			src: local('{{ config["font-path"]}}'), local('{{ config["font-path"]}}'),
+			url('{{ config["font-path"]}}') format("woff"),
+			url('{{ config["font-path"]}}') format("opentype"),
+			url('{{ config["font-path"]}}') format("svg");
+		}
+		.GlobalText{
+			font-family: HY;
+			font-size: 30px;
+			color: aliceblue;
+		}
+		.GlobalButton{
+			border: solid 1px #7FFFD4;
+			border-color: aquamarine;
+			border-radius: 5px;
+			width: 80%;
+			height: 10%;
+			background-color: rgba(0,0,0,0.2);
+		}
+		li{
+			line-height: 400%;
+		}
+	</style>
+	<style>
+		html,body{
+			height: 100%;
+		}
+		#whole_bg{
+			background: url({{ config['background-image-path'] }});
+			background-repeat: no-repeat;
+			background-position: center;
+		}
+		
+		.transparent_box{
+			filter:alpha(Opacity=220);
+			-moz-opacity:0.6;
+			opacity: 0.6 
+			background-color: black;
+		}
+		
+		#side_box{
+			float: left;
+			min-width: 200px;
+			min-height: 800px;
+			background-color: {{ config['sizebox-bgcolor'] }};
+		}
+		#main_box{
+			margin-left: 30px;
+			float: left;
+			min-width: 600px;
+			min-height: 800px;
+			background-color: {{ config['mainbox-bgcolor']}};
+		}
+		iframe{
+			height: 90%;
+			width: 90%;
+			margin-left: 5%;
+			margin-top: 5%;
+			border: none;
+		}
+		
+	</style>
+	
+	<script type="text/javascript">
+		window.onload=function(){
+			_body = document.getElementById("whole_bg")
+			_side_box = document.getElementById("side_box")
+			_side_box.style.width = Math.floor(_body.offsetWidth * 0.2) + "px"
+			_side_box.style.height = Math.floor(_body.offsetHeight * 0.9) + "px"
+			
+			_main_box = document.getElementById("main_box")
+			_main_box.style.width = Math.floor(_body.offsetWidth * 0.75) + "px"
+			_main_box.style.height = Math.floor(_body.offsetHeight * 0.9) + "px"
+		}
+		function gateway(url){
+			_content = document.getElementById("content_page")
+			_content.src = url
+		}
+	</script>
+	<body id="whole_bg">
+		<div>
+			<div id="side_box">
+				<ul style="list-style: none;">
+					<li>
+						<button class="GlobalButton GlobalText" style="color: #000000;" onclick="gateway('/hello')">主页</button>
+					</li>
+					<li>
+						<button class="GlobalButton GlobalText" style="color: #000000;" onclick="gateway('/filelist/Files')">文件列表</button>
+					</li>
+				</ul>
+			</div>
+			<div id="main_box">
+				<iframe id="content_page" src="/hello"></iframe>
+			</div>
+		</div>
+	</body>
+</html>
