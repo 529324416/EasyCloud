@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>EasyCloud Verify</title>
+		<style>
+			.common_text{
+				font-family: "lucida console";
+				font-size: 15px;
+				color: #7FFFD4;
+			}
+			.MyInput{
+			    outline-style: none ;
+			    border: 1px solid #ccc; 
+			    border-radius: 3px;
+			    padding: 13px 14px;
+			    font-size: 14px;
+			    font-weight: 700;
+			    font-family: "lucida console";
+				color: #31BC86;
+				width: 300px;
+			}
+			.MenuButton{
+				font-family: "lucida console";
+				color: #F0F8FF;
+				border: solid 1px #7FFFD4;
+				border-color: aquamarine;
+				border-radius: 5px;
+				height: 100%;
+				width: 50%;
+				background-color: rgba(25,25,25,0.3);
+				display: block;
+				margin: 0 auto;
+				transition: width 1s;
+				-webkit-transition: width 1s;
+			}
+			.MenuButton:hover{
+				width: 90%;
+			}
+			.body{
+				text-align: center;
+			}
+			.CenterBox{
+				width: 500px;
+				height: 200px;
+			}
+		</style>
+	</head>
+	
+	<script>
+		function verify(){
+			_pwd = document.getElementById("password").value
+			if(_pwd != ""){
+				var fd = new FormData()
+				fd.append("password",_pwd)
+				var xhr = new XMLHttpRequest()
+				xhr.addEventListener("load",operationComplete,false)
+				xhr.open("POST","/")
+				xhr.send(fd)
+			}else{
+				verify_failed("missing password")
+			}
+		}
+		function operationComplete(evt){
+			
+			if(evt.target.responseText == "success"){
+				alert("welcome ...")
+				window.location.href = "/entry"
+			}else{
+				failed("password error")
+			}
+		}
+		function failed(reason){
+			alert("verify failed for reason :" + reason)
+		}
+	</script>
+	
+	
+	<body>
+		<div class="CenterBox" style="margin:0 auto;text-align: center;">
+			<div style="width: 100%;height: 20%;margin-top: 10%">
+				<h3 style="margin-top: 60%;" class="common_text">输入密码<input class="MyInput" id="password" style="margin-left: 40px;" type="text" value=""/></h3>
+			</div>
+			<div style="height: 30%;margin-top: 10%;">
+				<button class="MenuButton" onclick="verify()">确认</button>
+			</div>
+		</div>
+	</body>
+</html>
