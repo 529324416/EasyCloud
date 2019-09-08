@@ -18,27 +18,31 @@ iplist = []
 def HTML_verify():
     ''' verify target user'''
 
-    if request.method == 'GET':
-        _ip = request.remote_addr
-        if _ip in iplist:
-            return redirect(url_for('HTML_entry'))
-        else:
-            return render_template("verify.html")
-    elif request.method == 'POST':
-        _password = request.form["password"]
-        if verify(_password):
-            iplist.append(request.remote_addr)
-            return "success"
-        else:
-            return "failed"
+    try:
+        if request.method == 'GET':
+            if request.remote_addr in iplist:
+                return redirect(url_for('HTML_entry'))
+            else:
+                return render_template("verify.html")
+        elif request.method == 'POST':
+            _password = request.form["password"]
+            if verify(_password):
+                iplist.append(request.remote_addr)
+                return "success"
+            else:
+                return "failed"
+    except Exception as e:
+        print(e)
+        return "404"
 
 
 @app.route("/entry")
-def HMTL_entry():
+def HTML_entry():
 
     if request.remote_addr in iplist:
         return render_template("index.html",config=cfg)
-    return redirect(url_for('HTML_verify'))
+    else:
+        return redirect(url_for('HTML_verify'))
 
 @app.route("/hello")
 def HTML_hello():
