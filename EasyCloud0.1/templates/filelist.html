@@ -177,6 +177,17 @@
 			xhr.send(fd)
 			//window.location.reload()
 		}
+		function set_all(){
+			/* set all checked box on or off */
+
+			var _filelist = document.getElementById("filelist").getElementsByClassName("file")
+			var _status = document.getElementById("all_check").checked
+			for(var i = 0;i<_filelist.length;i++){
+				/* inner li label */ 
+				
+				_filelist[i].getElementsByClassName("filechoose_box")[0].getElementsByTagName("input")[0].checked = _status
+			}
+		}
 		function remove_select_files(){
 			/* output all files selected */
 
@@ -188,8 +199,6 @@
 				
 				if(_filelist[i].getElementsByClassName("filechoose_box")[0].getElementsByTagName("input")[0].checked){
 					var _p = _filelist[i].getElementsByClassName("filechoose_file")[0]
-					console.log(_p)
-					console.log(_p.innerHTML)
 					_Ret.push(_p.innerHTML)
 				}
 			}
@@ -274,7 +283,7 @@
 		<h2 id="current_path" class="common_text">{{ current_path }}</h2>
 		<table id="filelist">
 			<tr class="header" style="background-color: rgba(0,0,0,0.5)">
-				<th class="check_box"><input autocomplete="off" type="checkbox"/></th>
+				<th class="check_box"><input id="all_check" onclick="set_all()" autocomplete="off" type="checkbox"/></th>
 				<th>文件名</th>
 				<th>类型</th>
 				<th>大小</th>
@@ -287,7 +296,7 @@
 				<td class="td_box">{{ file['filename'] }}</td>
 				<td class="td_box">{{ file['filetype'] }}</td>
 				<td class="td_box">{{ file['filesize'] }}</td>
-				<td class="td_box"><a href={{ "/download/" + file['filepath'] }}>download</a></td>
+				<td class="td_box"><a href={{ "/downloadex/" + file['filepath'] }}>download</a></td>
 				<td class="td_box filechoose_file" style="display: none;" >{{ file['filepath']}}</td>
 			</tr>
 			{% else %}

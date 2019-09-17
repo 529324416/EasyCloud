@@ -1,4 +1,5 @@
 import os
+from urllib import parse
 
 DIR = 0
 FILE = 1
@@ -102,14 +103,15 @@ def filetype(filename):
                 break
     return ftype
 
-def fileobj(name,_type,size,filepath):
+def fileobj(name,_type,size,filepath,link):
 
     return {
         "_type":FILE,
         "filename":name,
         "filepath":filepath,
         "filetype":_type,
-        "filesize":size
+        "filesize":size,
+        "filelink":link
     }
 
 def folderobj(name,path):
@@ -147,7 +149,8 @@ def scan_floder_first(floder):
             _filesize = file_size(_tmp)
             _filepath = _tmp
             _filename = _sub
-            _Ret.append(fileobj(_filename,_filetype,_filesize,_filepath))
+            _filelink = _filepath
+            _Ret.append(fileobj(_filename,_filetype,_filesize,_filepath,_filelink))
         else:
             _Ret.append(folderobj(_sub,_tmp))
     return _Ret

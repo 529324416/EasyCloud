@@ -1,5 +1,5 @@
 from flask import Flask
-from flask import render_template,make_response,send_from_directory
+from flask import render_template,make_response,send_from_directory,send_file
 from flask import request,session,redirect,url_for
 from werkzeug import secure_filename
 
@@ -10,6 +10,9 @@ from ec_time import Timer
 
 from threading import Thread
 from gevent import pywsgi
+from urllib import parse
+
+
 app = Flask(__name__)
 
 iplist = []
@@ -67,10 +70,23 @@ def download(path_name):
     if request.remote_addr in iplist:
         directory = os.path.dirname(path_name)
         filename = path_name.split("/")[-1]
+        print(directory,filename)
         res = make_response(send_from_directory(directory,filename,as_attachment=True))
         return res
     else:
         return redirect(url_for("HTML_verify"))
+
+@app.route("/downloadex/<path:path_name>")
+def downloadex(path_name):
+
+    response = make_response(send_file(path_name))
+    basename = os.path.basename(path_name)
+    response.headers["Content-Disposition"] = \
+        "attachment;" \
+        "filename*=UTF-8''{utf_filename}".format(
+            utf_filename=parse.quote(basename.encode('utf-8'))
+        )
+    return response
 
 @app.route("/upload/<path:path_name>",methods=['POST'])
 def upload_file(path_name):
@@ -127,7 +143,7 @@ def create_folder(path_name):
 
 
 
-_timer = Timer(24 * 3600)
+_timer = Timer(72 * 3600)
 def _clear(_timer,iplist):
 
     print("ip刷新器开启")
@@ -135,13 +151,14 @@ def _clear(_timer,iplist):
         if _timer.tick():
             iplist.clear()
 
-t = Thread(target=_clear,args=(_timer,iplist))
-t.start()
+# t = Thread(target=_clear,args=(_timer,iplist))
+# t.start()
 
 if __name__ == '__main__':
 
-    # app.run(host="127.0.0.1",threaded=True,port=45534)
+    app.run(host="127.0.0.1",threaded=True,port=45534,debug=True)
     # t.start()
-    gserver = pywsgi.WSGIServer(('0.0.0.0',45534),app)
-    gserver.serve_forever()
-    
+    # b1c31ffb4e441292630a7b6b815589cb
+
+    # gserver = pywsgi.WSGIServer(('0.0.0.0',45534),app)
+    # gserver.serve_forever()
